@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="UploadTitle">Lockbox Upload</string>
+    <string name="SignInPrompt">Sign In</string>
+    <string name="passwordprompt">Password</string>
+    <string name="usernameprompt">Email Address</string>
+    <string name="Upload">Upload</string>
+    <string name="BrowseText">Browse...</string>
+    <string name="UploadPrompt">Upload A Photo</string>
+    
+    <string name="app_name">Lockbox Upload</string>
+<string name="LoginTitle">Sign In</string>
+<string name="ChooseMediaPrompt">Upload Media</string>
+<string name="TakePicturePrompt">Take A Picture</string>
+</resources>

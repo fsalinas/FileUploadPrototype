@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    
+	<TextView 	android:layout_height="wrap_content" 
+				android:layout_width="fill_parent" 
+				android:inputType="none" 
+				android:id="@+id/txtUploadPrompt" 
+				android:textSize="16sp" 
+				android:padding="10dp" android:text="@string/UploadTitle">
+	</TextView>
+	
+	<LinearLayout android:layout_height="wrap_content" 
+				android:id="@+id/llButtons" 
+				android:layout_width="fill_parent"
+				android:orientation="vertical">
+        <ImageButton    android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:id="@+id/UploadMedia" 
+                        android:layout_gravity="center_horizontal" 
+                        android:src="@drawable/icon" 
+                        android:layout_margin="36dp" 
+                        android:onClick="onUploadClick">
+        </ImageButton>		
+        <TextView   android:text="@string/ChooseMediaPrompt" 
+                    android:layout_width="wrap_content" 
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="none" 
+                    android:id="@+id/txtChooseMediaPrompt" 
+                    android:layout_height="wrap_content" 
+                    android:textSize="12sp" android:paddingBottom="10dp">
+        </TextView>
+        <ImageButton android:layout_width="wrap_content" 
+                     android:layout_height="wrap_content" 
+                     android:id="@+id/UploadCamera" 
+                     android:src="@drawable/icon" 
+                     android:layout_gravity="center_horizontal" 
+                     android:layout_margin="36dp" 
+                     android:onClick="onCameraClick">
+        </ImageButton>
+	   	<TextView   android:text="@string/TakePicturePrompt" 
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center_horizontal" 
+                    android:inputType="none" 
+                    android:id="@+id/txtTakePicturePrompt" 
+                    android:layout_height="wrap_content" 
+                    android:textSize="12sp" android:paddingBottom="10dp">
+        </TextView>
+	   	
+	</LinearLayout>
+</LinearLayout>
