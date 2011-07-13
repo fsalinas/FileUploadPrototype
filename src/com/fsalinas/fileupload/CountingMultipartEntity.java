@@ -59,7 +59,7 @@ public class CountingMultipartEntity extends MultipartEntity {
 
 			this.transferred++;
 
-               if ( this.listener != null )
+             if ( this.listener != null )
 			    this.listener.transferred(this.transferred);
         }
     }

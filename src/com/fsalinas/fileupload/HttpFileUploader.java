@@ -18,10 +18,8 @@ public class HttpFileUploader implements FileUploader{
 
     private URI uri;
     private ProgressListener progressListener;
-    
-    public HttpFileUploader(URI uri) {
-        this.uri = uri;
-    }
+    private HttpPost httpPost;
+    private DefaultHttpClient httpClient;
 
     @Override
     public URI getURI() {
@@ -43,7 +41,22 @@ public class HttpFileUploader implements FileUploader{
         this.progressListener = progressListener;
     }
 
-    private HttpPost httpPost;
+    public DefaultHttpClient getHttpClient() {
+
+        if ( httpClient == null )
+            httpClient = new DefaultHttpClient();
+
+        return httpClient;
+    }
+
+    public void setHttpClient(DefaultHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
+    public HttpFileUploader(URI uri) {
+        this.uri = uri;
+    }
+
 
     @Override
     public Long uploadFile(File fileToUpload) {
@@ -55,20 +68,18 @@ public class HttpFileUploader implements FileUploader{
             return bytesUploaded;
         }
 
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        httpClient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+        getHttpClient().getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
 
         httpPost = new HttpPost(this.uri);
-        CountingMultipartEntity mpEntity = new CountingMultipartEntity(this.progressListener);
 
-        ContentBody cbFile = new FileBody(fileToUpload);
-        mpEntity.addPart("file", cbFile);
+        CountingMultipartEntity mpEntity = new CountingMultipartEntity(this.progressListener);
+        mpEntity.addPart("file", GetContentBody(fileToUpload));
 
         httpPost.setEntity(mpEntity);
 
         HttpResponse response = null;
         try {
-            response = httpClient.execute(httpPost);
+            response = getHttpClient().execute(httpPost);
         } catch (ClientProtocolException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -90,7 +101,7 @@ public class HttpFileUploader implements FileUploader{
             }
         }
 
-        httpClient.getConnectionManager().shutdown();
+        getHttpClient().getConnectionManager().shutdown();
 
         if (response != null) {
             bytesUploaded = response.getEntity().getContentLength();
@@ -98,6 +109,11 @@ public class HttpFileUploader implements FileUploader{
 
         return bytesUploaded;
     }
+
+    private ContentBody GetContentBody(File file) {
+        return new FileBody(file);
+    }
+
 
     private void validateFileToUpload(File fileToUpload) {
         if ( fileToUpload == null ) {
@@ -116,6 +132,6 @@ public class HttpFileUploader implements FileUploader{
     @Override
     public void cancelUpload() {
         httpPost.abort();
-
     }
+
 }

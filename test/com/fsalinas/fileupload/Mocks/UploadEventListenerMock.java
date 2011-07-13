@@ -27,6 +27,6 @@ public class UploadEventListenerMock implements UploadEventListener {
     @Override
     public void uploadComplete(Object source, long bytesTransferred) {
         AsyncFileUploader htfu = (AsyncFileUploader) source;
-         htfu.removeUploadEventListener(this);
+        htfu.removeUploadEventListener(this);
     }
 }
