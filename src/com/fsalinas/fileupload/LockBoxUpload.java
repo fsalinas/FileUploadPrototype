@@ -21,11 +21,13 @@ public class LockBoxUpload extends Activity implements UploadEventListener{
     private static final int CAMERA_PIC_REQUEST = 2;
 
     //private static final String UPLOAD_URL = "http://10.0.10.51/FileUploadPrototype/Default.aspx";
-	private static final String UPLOAD_URL = "http://192.168.5.104/FileUploadPrototype/Default.aspx";
+	//private static final String UPLOAD_URL = "http://192.168.5.104/FileUploadPrototype/Default.aspx";
+    private static final String UPLOAD_URL = "http://192.168.5.117/uploader.php";
     private Uri selectedImageUri;
     private AsyncFileUploader afu;
     private ImageHelper imageHelper;
     private UploadControl uploadControl;
+
 
 	/** Called when the activity is first created. */
     @Override

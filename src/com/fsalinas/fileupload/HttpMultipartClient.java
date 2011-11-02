@@ -12,7 +12,17 @@ import java.util.List;
 import java.util.Random;
 
 public class HttpMultipartClient {
-	public class Parameter {
+
+    public ProgressListener getProgressListener() {
+        return this.progressListener;
+    }
+
+    public void setProgressListener(ProgressListener progressListener) {
+        this.progressListener = progressListener;
+    }
+
+
+    public class Parameter {
 		private String name;
 		private String value;
 
@@ -39,7 +49,7 @@ public class HttpMultipartClient {
 
 		@Override
 		public String toString() {
-			return getName() + ":" + getValue();
+			return getName() + ": " + getValue() + END;
 		}
 	}
 
@@ -47,7 +57,7 @@ public class HttpMultipartClient {
 	private static final String END = "\r\n";
 	private static final int CONNECTION_TIMEOUT = 10000;
 	private final String boundary = new Integer(new Random().nextInt(Integer.MAX_VALUE)).toString();
-	private final String lastBoundary = END + "";
+	private final String lastBoundary = END + "--" + boundary + "--" + END;
 	private Socket socket;
 	private String host;
 	private int port;
@@ -66,6 +76,8 @@ public class HttpMultipartClient {
 	private StringBuilder headersBuffer;
 	private StringBuilder bodyBuffer;
 	private long length = 0;
+    private ProgressListener progressListener;
+    private Boolean isCancelled = false;
 
 	public HttpMultipartClient(URI uri)
 			throws IllegalArgumentException {
@@ -88,6 +100,7 @@ public class HttpMultipartClient {
 
 	public void disconnect() throws IOException {
 		socket.close();
+        isCancelled = true;
 	}
 
 	public void addHeader(String name, String value)
@@ -144,66 +157,98 @@ public class HttpMultipartClient {
 		postHeaders();
 	}
 
-	private void preHeaders() {
-		if (Log.isLoggable(TAG, Log.DEBUG))
-			Log.d(TAG, "Pre headers");
-		headersBuffer = new StringBuilder();
-		headersBuffer.append(method + " " + path + " HTTP/1.1" + END);
-		headersBuffer.append("User-Agent: FileSocialClient 1.0" + END);
-		headersBuffer.append("Host: " + host + END);
-		headersBuffer.append("Content-Type: multipart/form-data; boundary="
-				+ boundary + END);
-		if (!headers.isEmpty()) {
-			for (Iterator<Parameter> it = headers.iterator(); it.hasNext();) {
-				Parameter param = it.next();
-				headersBuffer.append(param.getName());
-				headersBuffer.append(": ");
-				headersBuffer.append(param.getValue());
-				headersBuffer.append(END);
-				if (Log.isLoggable(TAG, Log.DEBUG))
-					Log.d(TAG, "Header added: " + param);
-			}
-		}
-		if (!cookies.isEmpty()) {
-			headersBuffer.append("Cookie: ");
-			for (Iterator<Parameter> it = cookies.iterator(); it.hasNext();) {
-				Parameter param = it.next();
-				headersBuffer.append(param.getName());
-				headersBuffer.append("=");
-				headersBuffer.append(param.getValue());
-				if (it.hasNext())
-					headersBuffer.append("; ");
-				if (Log.isLoggable(TAG, Log.DEBUG))
-					Log.d(TAG, "Cookie added: " + param);
-			}
-			headersBuffer.append(END);
-		}
-		headersBuffer.append("Content-Length: ");
-	}
+    private void preHeaders() {
+        if (Log.isLoggable(TAG, Log.DEBUG))
+            Log.d(TAG, "Pre headers");
 
-	private void postHeaders() {
-		if (Log.isLoggable(TAG, Log.DEBUG))
-			Log.d(TAG, "Post headers");
-		length = fileSize + lastBoundary.length() + bodyBuffer.length();
-		headersBuffer.append(length);
-		headersBuffer.append(END + END);
-	}
+        headersBuffer = new StringBuilder();
+        headersBuffer.append(method + " " + path + " HTTP/1.1" + END);
+        headersBuffer.append("User-Agent: FileSocialClient 1.0" + END);
+        headersBuffer.append("Host: " + host + END);
+        headersBuffer.append("Content-Type: multipart/form-data; boundary="
+                + boundary + END);
 
-	private void prepareBody() {
-		if (Log.isLoggable(TAG, Log.DEBUG))
-			Log.d(TAG, "Preparing body");
-		bodyBuffer = new StringBuilder();
-		if (!fields.isEmpty()) {
-			for (Parameter param : fields) {
-				bodyBuffer.append(param);
-				if (Log.isLoggable(TAG, Log.DEBUG))
-					Log.d(TAG, "Field added: " + param);
-			}
-		}
-		if (fileStream != null) {
-			bodyBuffer.append(END + END + boundary + END);
-		}
-	}
+        if (!headers.isEmpty()) {
+            for (Iterator<Parameter> it = headers.iterator(); it.hasNext();) {
+                Parameter param = it.next();
+                headersBuffer.append(param.getName());
+                headersBuffer.append(": ");
+                headersBuffer.append(param.getValue());
+                headersBuffer.append(END);
+
+                if (Log.isLoggable(TAG, Log.DEBUG))
+                    Log.d(TAG, "Header added: " + param);
+            }
+        }
+
+        if (!cookies.isEmpty()) {
+            headersBuffer.append("Cookie: ");
+            for (Iterator<Parameter> it = cookies.iterator(); it.hasNext();) {
+                Parameter param = it.next();
+
+                headersBuffer.append(param.getName());
+                headersBuffer.append("=");
+                headersBuffer.append(param.getValue());
+
+                if (it.hasNext())
+                    headersBuffer.append("; ");
+
+                if (Log.isLoggable(TAG, Log.DEBUG))
+                    Log.d(TAG, "Cookie added: " + param);
+            }
+            headersBuffer.append(END);
+        }
+
+        headersBuffer.append("Content-Length: ");
+    }
+
+    private void postHeaders() {
+        if (Log.isLoggable(TAG, Log.DEBUG))
+            Log.d(TAG, "Post headers");
+
+        length = fileSize + lastBoundary.length() + bodyBuffer.length();
+        headersBuffer.append(length);
+        headersBuffer.append(END + END);
+    }
+
+    private void prepareBody() {
+        if (Log.isLoggable(TAG, Log.DEBUG))
+            Log.d(TAG, "Preparing body");
+
+        bodyBuffer = new StringBuilder();
+
+        if (!fields.isEmpty()) {
+            for (Parameter param : fields) {
+                bodyBuffer.append("--");
+                bodyBuffer.append(boundary);
+                bodyBuffer.append(END);
+                bodyBuffer.append("Content-Disposition: form-data; name=\"");
+                bodyBuffer.append(param.getName());
+                bodyBuffer.append("\"");
+                bodyBuffer.append(END);
+                bodyBuffer.append(END);
+                bodyBuffer.append(param.getValue());
+                bodyBuffer.append(END);
+
+                if (Log.isLoggable(TAG, Log.DEBUG))
+                    Log.d(TAG, "Field added: " + param);
+            }
+        }
+
+        if (fileStream != null) {
+            bodyBuffer.append("--");
+            bodyBuffer.append(boundary);
+            bodyBuffer.append(END);
+            bodyBuffer.append("Content-Disposition: form-data; name=\"");
+            bodyBuffer.append("file");
+            bodyBuffer.append("\"; filename=\"");
+            bodyBuffer.append(fileName);
+            bodyBuffer.append("\"");
+            bodyBuffer.append(END);
+            bodyBuffer.append(END);
+        }
+    }
+
 
 	public void send() throws IOException {
 		prepare();
@@ -217,13 +262,14 @@ public class HttpMultipartClient {
 			//FileInputStream out = new FileInputStream("logfile.txt");
 			out.print(headersBuffer);
 			out.print(bodyBuffer);
-			bytesSent += headersBuffer.length() + headersBuffer.length();
+			bytesSent += headersBuffer.length() + bodyBuffer.length();
 			byte[] bytes = new byte[1024 * 65];
 			int size;
 			while ((size = fileStream.read(bytes)) > 0) {
 				bytesSent += size;
 				out.write(bytes, 0, size);
 				out.flush();
+                this.progressListener.transferred((long)bytesSent);
 			}
 			out.print(lastBoundary);
 			out.flush();
@@ -258,8 +304,8 @@ public class HttpMultipartClient {
 				if (reader != null)
 					reader.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				if ( ! isCancelled)
+				    e.printStackTrace();
 			}
 		}
 	}

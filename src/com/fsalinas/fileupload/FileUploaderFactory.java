@@ -19,6 +19,9 @@ public class FileUploaderFactory {
             case HttpUploader:
                 fileUploader = new HttpFileUploader(uploadURI);
                 break;
+            case HttpSimpleUploader:
+                fileUploader = new HttpSimpleFileUploader(uploadURI);
+                break;
             case AWSUploader:
                 fileUploader = null;
                 break;
@@ -30,6 +33,6 @@ public class FileUploaderFactory {
     private static FileUploaderType GetConfiguredType() {
         //
         // TODO: Read from Configuration Singleton
-        return FileUploaderType.HttpUploader;
+        return FileUploaderType.HttpSimpleUploader;
     }
 }

@@ -5,10 +5,10 @@ import com.fsalinas.fileupload.UploadEventListener;
 
 /**
  * Created by IntelliJ IDEA.
+ * Package: ${PACKAGE_NAME}
  * User: fsalinas
  * Date: 5/27/11
  * Time: 11:21 PM
- * To change this template use File | Settings | File Templates.
  */
 public class UploadEventListenerMock implements UploadEventListener {
 

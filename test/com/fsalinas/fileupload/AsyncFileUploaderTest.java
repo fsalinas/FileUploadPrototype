@@ -51,9 +51,9 @@ public class AsyncFileUploaderTest extends AndroidTestCase {
     }
 
     public void testExecute() throws Exception {
-        File testFile = mock(File.class);
+        /*File testFile = mock(File.class);
 
-        Mockito.when(testFile.length()).thenReturn(10000L);
+        Mockito.when(testFile.length()).thenReturn(10000L);*/
 
 
     }

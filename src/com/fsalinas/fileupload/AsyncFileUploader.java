@@ -17,6 +17,7 @@ public class AsyncFileUploader extends AsyncTask<File, Integer, Long> implements
 
 		fileSize = 0L;
         fileUploader = FileUploaderFactory.GetFileUploader(urlString);
+        fileUploader.setProgressListener(this);
     }
 
 	public synchronized void addUploadEventListener (UploadEventListener listener) {
