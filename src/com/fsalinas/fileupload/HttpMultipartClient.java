@@ -11,6 +11,40 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Upload a file to server chunk by chunk, using socket connection instead of
+ * standard android library because of infamous pre froyo android bug 3164
+ * http://code.google.com/p/android/issues/detail?id=3164#c6
+ *
+ * Class could be redefined in order to implement nice features, like notify
+ * of upload progress and other goodies
+ *
+ *
+ * -- Original credits: keianhzo
+ * http://groups.google.com/group/android-developers/msg/4ddd2e502f195e3a
+ *
+ * -- How to use it:
+ * http://stackoverflow.com/questions/2105364/android-i-want-to-show-file-upload-progress-to-the-user
+ * HttpMultipartClient httpMultipartClient = new HttpMultipartClient("v2.bluppr.nl", "/webservice/placeorder", 80);
+ * FileInputStream fis = new FileInputStream(path + fileName);
+ * httpMultipartClient.addFile(fileName, fis, fis.available());
+ * httpMultipartClient.setRequestMethod("POST");
+ * httpMultipartClient.send();
+ *
+ *
+ * -- Server side code:
+ * <?php
+ * $target_path = "uploads/";
+ * $target_path = $target_path . basename( $_FILES['uploadedfile']['name']);
+ * if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $target_path)) {
+ *     echo "The file ".  basename( $_FILES['uploadedfile']['name'])." has been uploaded " .$_POST["order"]. " post";
+ * } else{
+ *     echo "There was an error uploading the file, please try again!";
+ * }
+ * ?>
+ *
+ * @author Alfredo "Rainbowbreeze" Morresi
+ */
 public class HttpMultipartClient {
 
     public ProgressListener getProgressListener() {
@@ -56,7 +90,7 @@ public class HttpMultipartClient {
 	private static final String TAG = "HttpMultipartClient";
 	private static final String END = "\r\n";
 	private static final int CONNECTION_TIMEOUT = 10000;
-	private final String boundary = new Integer(new Random().nextInt(Integer.MAX_VALUE)).toString();
+	private final String boundary = Integer.toString(new Random().nextInt(Integer.MAX_VALUE));
 	private final String lastBoundary = END + "--" + boundary + "--" + END;
 	private Socket socket;
 	private String host;
@@ -169,8 +203,7 @@ public class HttpMultipartClient {
                 + boundary + END);
 
         if (!headers.isEmpty()) {
-            for (Iterator<Parameter> it = headers.iterator(); it.hasNext();) {
-                Parameter param = it.next();
+            for (Parameter param : headers) {
                 headersBuffer.append(param.getName());
                 headersBuffer.append(": ");
                 headersBuffer.append(param.getValue());
@@ -289,7 +322,7 @@ public class HttpMultipartClient {
 							headerLine[1]));
 				}
 			}
-			StringBuffer payload = new StringBuffer();
+			StringBuilder payload = new StringBuilder();
 			boolean bodyEnd = false;
 			while ((line = reader.readLine()) != null && !bodyEnd) {
 				if (line.length() == 0)
