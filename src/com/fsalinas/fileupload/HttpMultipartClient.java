@@ -65,14 +65,6 @@ public class HttpMultipartClient {
 			value = v;
 		}
 
-		public void setName(String n) {
-			name = n;
-		}
-
-		public void setValue(String v) {
-			value = v;
-		}
-
 		public String getName() {
 			return name;
 		}
@@ -92,14 +84,18 @@ public class HttpMultipartClient {
 	private static final int CONNECTION_TIMEOUT = 10000;
 	private final String boundary = Integer.toString(new Random().nextInt(Integer.MAX_VALUE));
 	private final String lastBoundary = END + "--" + boundary + "--" + END;
+
+
 	private Socket socket;
 	private String host;
 	private int port;
 	private String path;
 	private String method;
+
 	private List<Parameter> headers;
 	private List<Parameter> cookies;
 	private List<Parameter> fields;
+
 	private String fileName;
 	private InputStream fileStream;
 	private int fileSize;
@@ -292,7 +288,6 @@ public class HttpMultipartClient {
 			socket.setSoTimeout(CONNECTION_TIMEOUT);
 			int bytesSent = 0;
 			PrintStream out = new PrintStream(socket.getOutputStream());
-			//FileInputStream out = new FileInputStream("logfile.txt");
 			out.print(headersBuffer);
 			out.print(bodyBuffer);
 			bytesSent += headersBuffer.length() + bodyBuffer.length();

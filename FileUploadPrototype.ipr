@@ -169,17 +169,17 @@
     </group>
   </component>
   <component name="ProjectDictionaryState">
-    <dictionary name="fsalinasna">
-      <words>
-        <w>fsalinas</w>
-      </words>
-    </dictionary>
     <dictionary name="fsalinas">
       <words>
         <w>async</w>
         <w>intelli</w>
         <w>multipart</w>
         <w>uploader</w>
+      </words>
+    </dictionary>
+    <dictionary name="fsalinasna">
+      <words>
+        <w>fsalinas</w>
       </words>
     </dictionary>
   </component>
